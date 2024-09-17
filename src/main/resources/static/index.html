@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Area Upload</title>
+    <style>
+        /* Reset styles for a clean slate */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1e1e1e; /* Dark Gray */
+            color: #d4d4d4;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            margin: 20px 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center; /* Center align items */
+            gap: 20px; /* Space between boxes */
+            padding: 20px;
+        }
+
+        .box {
+            /*background: #333;  */
+            padding: 20px;
+            /*border: 1px solid #ccc;*/
+            height: 400px;
+            width: 100%; /* Full width inside the container */
+            max-width: 500px; /* Maximum width for responsiveness */
+            overflow: hidden; /* Prevents overflow */
+            text-align: left;
+
+        }
+
+        textarea {
+            width: 100%; /* Full width inside the box */
+            height: 100%;
+            border: none;
+            padding: 10px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            resize: none; /* Prevents resizing */
+            border: 1px solid white ;
+            border-radius: 10px;
+
+        }
+
+        button {
+            width: 300px;
+            font-size: 20px; /* Adjusted for better fit */
+            margin-top: 20px;
+            padding: 10px;
+            border-radius:20px;
+            background: #444; /* Darker background for button */
+            color: #d4d4d4;
+            cursor:pointer;
+            transition: background 0.3s; /* Smooth transition on hover */
+        }
+
+        button:hover {
+            background: #555; /* Slightly lighter on hover */
+        }
+
+        #result {
+            margin: 20px 0;
+            position: relative; /* Allows positioning of the spinner */
+        }
+
+        #loading {
+            display: none; /* Hidden by default */
+            margin-top: 10px;
+            color: #d4d4d4;
+        }
+
+        /* Spinner styling */
+        .spinner {
+            border: 4px solid #f3f3f3; /* Light gray background */
+            border-top: 4px solid #d4d4d4; /* Darker gray for the spinner */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: auto; /* Center align spinner */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<h1>Input File Contents</h1>
+<form id="uploadForm">
+    <div class="container">
+        <div class="box">
+            <label for="design">Design File Content:</label>
+            <textarea id="design" name="design" rows="23" required></textarea>
+        </div>
+
+        <div class="box">
+            <label for="tb">Testbench File Content:</label>
+            <textarea id="tb" name="tb" rows="10" required></textarea>
+        </div>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<h2>Result</h2>
+<div id="result"></div>
+<div id="loading">
+    <div class="spinner"></div> Loading...
+</div>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Show the loading indicator
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').innerText = ''; // Clear previous result
+
+        const formData = new FormData();
+        formData.append('design', new Blob([document.getElementById('design').value], { type: 'text/plain' }), 'design.txt');
+        formData.append('tb', new Blob([document.getElementById('tb').value], { type: 'text/plain' }), 'tb.txt');
+
+        fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('result').innerText = data;
+            document.getElementById('loading').style.display = 'none'; // Hide the loading indicator
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('result').innerText = 'An error occurred.';
+            document.getElementById('loading').style.display = 'none'; // Hide the loading indicator
+        });
+    });
+</script>
+</body>
+</html>
